@@ -62,6 +62,20 @@ SECTIONS
         KEEP(*(.eh_frame*))
     } > FLASH
 
+    .riot_core 0x080E0000 :
+    {
+        __start_riot_core = .;
+        *(.riot_core)
+        __stop_riot_core = .;
+    } > FLASH
+	
+    .nvdata_protected_data 0x080E3000 :
+    {
+        __start_nvdata_protected_data = .;
+        *(.nvdata_protected_data)
+        __stop_nvdata_protected_data = .;
+    } > FLASH	
+
     .ARM.extab :
     {
         *(.ARM.extab* .gnu.linkonce.armextab.*)
