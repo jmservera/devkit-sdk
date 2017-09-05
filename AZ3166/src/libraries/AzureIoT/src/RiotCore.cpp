@@ -179,6 +179,7 @@ void RiotStart(const uint8_t  *CDI, const uint16_t  CDILen)
                            cDigest, RIOT_DIGEST_LENGTH,
                            (const uint8_t *)RIOT_LABEL_ALIAS,
                            lblSize(RIOT_LABEL_ALIAS));
+
                                                      
     // Clean up potentially sensative data
     memset(cDigest, 0x00, RIOT_DIGEST_LENGTH);
@@ -249,11 +250,22 @@ void RiotStart(const uint8_t  *CDI, const uint16_t  CDILen)
 		// Copy CSR/self-signed Cert
     length = sizeof(g_DICert);
     DERtoPEM(&derCtx, dcType, g_DICert, &length);
-		g_DICertLen = length;
+	g_DICertLen = length;
 		
-		// Clean up sensative data
-		memset(&deviceIDPriv, 0, sizeof(RIOT_ECC_PRIVATE));
-		
+	// Clean up sensative data
+	memset(&deviceIDPriv, 0, sizeof(RIOT_ECC_PRIVATE));
+
+    // Display info for Alias Key and Device ID
+    char *buf;
+    buf = RIoTGetDeviceID(NULL);
+    (void)printf("DeviceID Public\r\n%s\r\n", buf);
+    buf = RIoTGetAliasKey(NULL);
+    (void)printf("Alias Key Pair\r\n%s\r\n", buf);
+    buf = RIoTGetAliasCert(NULL);
+    (void)printf("Alias Key Certificate\r\n%s\r\n", buf);
+    buf = RIoTGetDeviceCert(NULL);
+    (void)printf("Device Certificate\r\n%s\r\n", buf);
+
     // Transfer control to firmware
     //AppStart();
     
