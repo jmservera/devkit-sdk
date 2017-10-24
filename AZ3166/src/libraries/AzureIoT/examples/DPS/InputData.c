@@ -8,5 +8,5 @@ const DICE_UDS DiceUDS = { DICE_UDS_TAG,
                            0x1c, 0xb4, 0x88, 0xb0, 0x74, 0x99, 0x3e, 0xae }};
 
 // DPS instance information on Overview
-const char* Global_Device_Endpoint = "[Global Device Endpoint]";
-const char* ID_Scope = "[ID Scope]";
+const char* Global_Device_Endpoint = "global.azure-devices-provisioning.net";
+const char* ID_Scope = "0ne00000045";

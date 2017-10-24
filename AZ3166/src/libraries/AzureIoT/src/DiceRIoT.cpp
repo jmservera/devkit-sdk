@@ -4,6 +4,7 @@
 #include "DiceCore.h"
 #include "RiotCore.h"
 #include <stdio.h>
+#include "azure_c_shared_utility/xlogging.h"
 
 // attribute section info from AZ3166.ld
 extern void* __start_riot_core;
@@ -40,6 +41,9 @@ static int DiceInit(void)
         return -1;
     }
 
+    LogInfo("The riot_core start address: %p", &__start_riot_core);
+    LogInfo("The riot_core end address: %p", &__stop_riot_core);
+
     return 0;
 }
 
@@ -56,6 +60,18 @@ int DiceRIoTStart(const char *RegistrationId)
     if (DiceCore() != 0){
         return -1;
     }
+
+    /*LogInfo("DiceCDI:");
+    for(int i = 0; i < DICE_DIGEST_LENGTH; i++){
+        if(i == (DICE_DIGEST_LENGTH - 1))
+        {
+            printf("%x\r\n", DiceCDI.bytes[i]);
+        }
+        else
+        {
+            printf("%x", DiceCDI.bytes[i]);
+        }
+    }*/
 
     // If DiceCore detects an error condition, it will not enable access to
     // the volatile storage segment. This attempt to transfer control to RIoT

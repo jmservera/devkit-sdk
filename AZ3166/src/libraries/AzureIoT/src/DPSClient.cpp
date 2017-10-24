@@ -114,12 +114,12 @@ bool __attribute__((section(".riot_fw"))) DPSClientStart(const char* dps_uri, co
     LogInfo("Iothub Version: %s\r\n", IoTHubClient_GetVersionString());
     
     // Transfer control to DICE|RIoT
-    if(DiceRIoTStart(registration_id) != 0)
+    /*if(DiceRIoTStart(registration_id) != 0)
     {
         LogError("Untrusted device.");
         return false;
-    }
-    
+    }*/
+
     DPS_LL_HANDLE handle = NULL;
     
     memset(&_dps_client_info, 0, sizeof(DPS_CLIENT_SAMPLE_INFO));

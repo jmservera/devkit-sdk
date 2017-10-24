@@ -114,6 +114,9 @@ int RiotStart(uint8_t *CDI, uint16_t CDILen, const char *RegistrationId)
     base = (uint8_t*)&__start_riot_fw;
     length = (uint8_t*)&__stop_riot_fw - base;
 
+    LogInfo("The riot_fw start address: %p", &__start_riot_fw);  
+    LogInfo("The riot_fw end address: %p", &__stop_riot_fw);  
+
     // Measure FW, i.e., calculate FWID
     if ((status = RiotCrypt_Hash(FWID, RIOT_DIGEST_LENGTH, base, length)) != RIOT_SUCCESS){
         LogError("Failure: RiotCrypt_Hash returned invalid status %d.", status);

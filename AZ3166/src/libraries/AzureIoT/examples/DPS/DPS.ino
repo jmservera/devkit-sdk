@@ -4,6 +4,7 @@
 #include "AzureIotHub.h"
 #include "IoTHubMQTTClient.h"
 #include "DPSClient.h"
+#include "DiceRIoT.h"
 
 #include "config.h"
 #include "utility.h"
@@ -121,8 +122,18 @@ void setup() {
   SensorInit();
 
   Screen.print(3, " > DPS");
+  Screen.print(3, " > DPS");
+
+  const char* registrationId = GetBoardID();
+  // Transfer control to DICE|RIoT
+  if(DiceRIoTStart(registrationId) != 0)
+  {
+      LogError("Untrusted device.");
+      return;
+  }
+
   // Transfer control to firmware
-  if(DPSClientStart(Global_Device_Endpoint, ID_Scope, GetBoardID()))
+  if(DPSClientStart(Global_Device_Endpoint, ID_Scope, registrationId))
   {
     Screen.print(2, "DPS connected!\r\n");
   }
