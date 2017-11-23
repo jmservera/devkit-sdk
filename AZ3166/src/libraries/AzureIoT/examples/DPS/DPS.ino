@@ -15,8 +15,8 @@
 #include "EEPROMInterface.h"
 
 // Input DPS instance info
-char* Global_Device_Endpoint = "";
-char* ID_Scope = "";
+char* Global_Device_Endpoint = "[Global Device Endpoint]";
+char* ID_Scope = "[ID Scope]";
 
 // UDS bytes for DICE|RIoT calculation
 uint8_t udsBytes[DICE_UDS_LENGTH] = { 0 };
