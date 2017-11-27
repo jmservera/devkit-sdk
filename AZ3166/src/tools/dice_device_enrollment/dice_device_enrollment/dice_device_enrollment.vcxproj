@@ -81,6 +81,10 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
+	<IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);$(ProjectDir)\RIoT;$(ProjectDir)\RIoT\Core;$(ProjectDir)\RIoT\Core\RIoTCrypt;$(ProjectDir)\RIoT\Core\RIoTCrypt\include;$(ProjectDir)\DICE;</IncludePath>
+    <SourcePath>$(ProjectDir)\RIoT;$(ProjectDir)\RIoT\Core;$(ProjectDir)\RIoT\Core\RIoTCrypt;$(ProjectDir)\RIoT\Core\RIoTCrypt\include;$(ProjectDir)\DICE;</SourcePath>
+    <ReferencePath>$(VC_ReferencesPath_x86);$(ProjectDir)\RIoT;$(ProjectDir)\RIoT\Core;$(ProjectDir)\RIoT\Core\RIoTCrypt;$(ProjectDir)\RIoT\Core\RIoTCrypt\include;$(ProjectDir)\DICE;</ReferencePath>
+    <LibraryPath>$(VC_LibraryPath_x86);$(WindowsSDK_LibraryPath_x86);$(NETFXKitsDir)Lib\um\x86;$(ProjectDir)\RIoT;$(ProjectDir)\RIoT\Core;$(ProjectDir)\RIoT\Core\RIoTCrypt;$(ProjectDir)\RIoT\Core\RIoTCrypt\include;$(ProjectDir)\DICE;</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
