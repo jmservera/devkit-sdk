@@ -8,11 +8,13 @@
 #include "DiceRIoT.h"
 
 // User inputs
-const char *udsString = "19e25a259d0c2be03a02d416c05c48ccd0cc7d1743458aae1cb488b074993eae"; //This is sample UDS string
-const char *macAddress = "[Devkit_Mac_Address]";
-char firmwareVer[10] = "[version]";
-const char *binFileFullPath = "C:\\Users\\[alias]\\AppData\\Local\\Arduino15\\packages\\AZ3166\\hardware\\stm32f4\\1.1.0\\libraries\\AzureIoT\\examples\\DPS\\.build\\DPS.ino.bin";
-const char *mapFileFullPath = "C:\\Users\\[alias]\\AppData\\Local\\Arduino15\\packages\\AZ3166\\hardware\\stm32f4\\1.1.0\\libraries\\AzureIoT\\examples\\DPS\\.build\\DPS.ino.map";
+char *udsString;
+char *macAddress;
+char *firmwareVer;
+
+// Input file names
+const char *binFileFullPath = ".\\DPS.ino.bin";
+const char *mapFileFullPath = ".\\DPS.ino.map";
 
 // Settings
 uint32_t udsStringLength = 64;
@@ -20,7 +22,7 @@ uint32_t macAddressLength = 12;
 uint32_t elementSize = 1; //bytes
 uint32_t aliasCertSize = 1024; //bytes
 
-// Flash start address name
+							   // Flash start address name
 const char * flashStartname = "FLASH            0x";
 
 // Riot attribute names
@@ -44,9 +46,64 @@ uint8_t * endRiotFw;
 uint8_t udsBytes[DICE_UDS_LENGTH] = { 0 };
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// Get user input
+static char* get_user_input(const char* text_value, int max_len)
+{
+	char* result = (char*)malloc(max_len + 1);
+	if (result == NULL)
+	{
+		(void)printf("failed to allocate buffer\r\n");
+		return result;
+	}
+	else
+	{
+		int index = 0;
+		memset(result, 0, max_len + 1);
+		printf("%s", text_value);
+		// trim the leading spaces
+		while (1)
+		{
+			int c = getchar();
+			if (c == EOF || c == 0xA)
+				break;
+			if (!isspace(c))
+			{
+				ungetc(c, stdin);
+				break;
+			}
+		}
+
+		while (1)
+		{
+			int input = getchar();
+			if (isspace(input) || input == EOF || input == 0xA)
+			{
+				break;
+			}
+			result[index++] = (char)input;
+			if (index == max_len)
+			{
+				// Will need to clear out the remaining buffer
+				while (input != EOF && input != 0xA)
+				{
+					input = getchar();
+				}
+				break;
+			}
+		}
+	}
+	return result;
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Validate user input data sanity
 static int udsStringValidated()
 {
+	if (udsString == NULL)
+	{
+		printf("udsString can NOT be NULL.\r\n");
+		return 1;
+	}
 	// Check length
 	int length = strlen(udsString);
 	if (length != udsStringLength)
@@ -92,6 +149,12 @@ static int macAddressValidated()
 
 static int firmwareVerValidated()
 {
+	if (firmwareVer == NULL)
+	{
+		printf("firmwareVer can NOT be NULL.\r\n");
+		return 1;
+	}
+
 	// Check format
 	int dotCount = 0;
 
@@ -100,11 +163,11 @@ static int firmwareVerValidated()
 	memset(element, 0, 2);
 	int badCharCount = 0;
 
-	for (int i = 0; i < strlen(firmwareVer); i++) 
+	for (int i = 0; i < strlen(firmwareVer); i++)
 	{
 		element[0] = firmwareVer[i];
 		if (element[0] == '.') {
-			dotCount ++;
+			dotCount++;
 		}
 		else
 		{
@@ -276,68 +339,69 @@ static unsigned long int findAddressInMapFile(const char * attributeName)
 // App start
 int main()
 {
+	int result = 0;
+
+	// Get user input
+	udsString = get_user_input("Input the UDS you saved into security chip of your DevKit: ", 64);
+	macAddress = get_user_input("Input the Mac Address on your DevKit: ", 12);
+	firmwareVer = get_user_input("Input the firmware version of the program running on your DevKit: ", 5);
+
 	// Check sanity of input data
 	if (validateUserInputData() != 0)
 	{
-		(void)printf("Press any key to continue:\r\n");
-		(void)getchar();
-		return 1;
+		result = 1;
+		goto EXIT;
 	}
 
 	// Prepare UDS from udsString
 	getUDSBytesFromString();
 
 	// Get desired firmware version and device's registration Id
-	char registrationId[32] = {'\0'};
+	char registrationId[32] = { '\0' };
 	getRegistrationId(registrationId);
 
 	// Get start address of flash from .bin file
-	unsigned long int result;
-	result = findAddressInMapFile(flashStartname);
-	if (result == 0)
+	unsigned long int resultAddress;
+	resultAddress = findAddressInMapFile(flashStartname);
+	if (resultAddress == 0)
 	{
-		(void)printf("Press any key to continue:\r\n");
-		(void)getchar();
-		return 1;
+		result = 1;
+		goto EXIT;
 	}
-	startBin = (uint8_t*)result;
+	startBin = (uint8_t*)resultAddress;
 
 	// Initilize the value of riot attributes stuff
-	result = findAddressInMapFile(startRiotCoreName);
-	if (result == 0)
+	resultAddress = findAddressInMapFile(startRiotCoreName);
+	if (resultAddress == 0)
 	{
-		(void)printf("Press any key to continue:\r\n");
-		(void)getchar();
-		return 1;
+		result = 1;
+		goto EXIT;
 	}
-	startRiotCore = (uint8_t*)result;
+	startRiotCore = (uint8_t*)resultAddress;
 
-	result = findAddressInMapFile(stopRiotCoreName);
-	if (result == 0)
+	resultAddress = findAddressInMapFile(stopRiotCoreName);
+	if (resultAddress == 0)
 	{
-		(void)printf("Press any key to continue:\r\n");
-		(void)getchar();
-		return 1;
+		result = 1;
+		goto EXIT;
 	}
-	endRiotCore = (uint8_t*)result;
+	endRiotCore = (uint8_t*)resultAddress;
 
-	result = findAddressInMapFile(startRiotFwName);
-	if (result == 0)
+	resultAddress = findAddressInMapFile(startRiotFwName);
+	if (resultAddress == 0)
 	{
-		(void)printf("Press any key to continue:\r\n");
-		(void)getchar();
-		return 1;
+		result = 1;
+		goto EXIT;
 	}
-	startRiotFw = (uint8_t*)result;
+	startRiotFw = (uint8_t*)resultAddress;
 
-	result = findAddressInMapFile(stopRiotFwName);
-	if (result == 0)
+	resultAddress = findAddressInMapFile(stopRiotFwName);
+	if (resultAddress == 0)
 	{
-		(void)printf("Press any key to continue:\r\n");
-		(void)getchar();
-		return 1;
+		result = 1;
+		goto EXIT;
 	}
-	endRiotFw = (uint8_t*)result;
+	endRiotFw = (uint8_t*)resultAddress;
 
 	// Read Riot_core machine code from .bin file
 	uint32_t riotSize = endRiotCore - startRiotCore;
@@ -346,9 +410,8 @@ int main()
 
 	if (getDataFromBinFile(startRiotCore, riotCore, riotSize) != 0) {
 		free(riotCore);
-		(void)printf("Press any key to continue:\r\n");
-		(void)getchar();
-		return 1;
+		result = 1;
+		goto EXIT;
 	}
 
 	// Read Riot_fw machine code from .bin file
@@ -358,9 +421,8 @@ int main()
 
 	if (getDataFromBinFile(startRiotFw, riotFw, riotFwSize) != 0) {
 		free(riotFw);
-		(void)printf("Press any key to continue:\r\n");
-		(void)getchar();
-		return 1;
+		result = 1;
+		goto EXIT;
 	}
 
 	// Retrieve alias certificate
@@ -370,7 +432,7 @@ int main()
 
 	// Write the cert to pem file
 	FILE * opening;
-	char certFileName[64] = {'\0'};
+	char certFileName[64] = { '\0' };
 	sprintf(certFileName, "%s.pem", registrationId);
 	opening = fopen(certFileName, "w");
 	fprintf(opening, aliasCertBuffer);
@@ -382,8 +444,8 @@ int main()
 	free(riotFw);
 	free(aliasCertBuffer);
 
+EXIT:
 	(void)printf("Press any key to continue:\r\n");
 	(void)getchar();
-    return 0;
+	return result;
 }
-
